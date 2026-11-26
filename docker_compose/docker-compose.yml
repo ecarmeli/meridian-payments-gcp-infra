@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:-local-dev-db-password}
+    networks:
+      - meridian_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    environment:
+      PORT: ${APP_PORT}
+      CANDIDATE_NAME: ${CANDIDATE_NAME}
+      GCP_REGION: ${GCP_REGION}
+      LOCAL_DEV: ${LOCAL_DEV}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      LOCAL_DB_PASSWORD: ${LOCAL_DB_PASSWORD-}
+      LOCAL_API_TOKEN: ${LOCAL_API_TOKEN-}
+    networks:
+      - meridian_private
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  meridian_private:
+    driver: bridge

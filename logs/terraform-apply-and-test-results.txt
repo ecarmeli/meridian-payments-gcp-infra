@@ -1,0 +1,697 @@
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc>   terraform -chdir=infra apply `
+>>     -var="gcp_project_id=meridian-payments-515811" `
+>>     -var="gcp_region=europe-west1" `
+>>     -var="cloudrun_image_tag=v1.0.3"
+var.api_token (ephemeral)
+  Third-party provider API token stored in Secret Manager (write-only; never persisted in state or plan files).
+
+  Enter a value: 
+
+
+var.sql_user_password (ephemeral)
+  Write-only password for appuser; pass via TF_VAR_sql_user_password at apply time (omitted from plans and state).
+
+  Enter a value: 
+
+
+google_artifact_registry_repository.repo: Preparing import... [id=projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo]
+google_artifact_registry_repository.repo: Refreshing state... [id=projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # google_artifact_registry_repository.repo will be imported
+    resource "google_artifact_registry_repository" "repo" {
+        cleanup_policy_dry_run = false
+        create_time            = "2026-11-26T07:26:41.025539Z"
+        deletion_policy        = "DELETE"
+        description            = "Meridian Payments API container images"
+        effective_labels       = {}
+        format                 = "DOCKER"
+        id                     = "projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo"
+        kms_key_name           = null
+        labels                 = {}
+        location               = "europe-west1"
+        mode                   = "STANDARD_REPOSITORY"
+        name                   = "meridian-repo"
+        project                = "meridian-payments-515811"
+        registry_uri           = "europe-west1-docker.pkg.dev/meridian-payments-515811/meridian-repo"
+        repository_id          = "meridian-repo"
+        terraform_labels       = {}
+        update_time            = "2026-11-26T09:22:11.799347Z"
+
+        docker_config {
+            immutable_tags = true
+        }
+
+        vulnerability_scanning_config {
+            enablement_config       = null
+            enablement_state        = "SCANNING_DISABLED"
+            enablement_state_reason = "API containerscanning.googleapis.com is not enabled."
+        }
+    }
+
+  # google_cloud_run_v2_service.api will be created
+  + resource "google_cloud_run_v2_service" "api" {
+      + conditions              = (known after apply)
+      + create_time             = (known after apply)
+      + creator                 = (known after apply)
+      + delete_time             = (known after apply)
+      + deletion_policy         = "DELETE"
+      + deletion_protection     = false
+      + effective_annotations   = (known after apply)
+      + effective_labels        = {
+          + "goog-terraform-provisioned" = "true"
+        }
+      + etag                    = (known after apply)
+      + expire_time             = (known after apply)
+      + generation              = (known after apply)
+      + id                      = (known after apply)
+      + ingress                 = "INGRESS_TRAFFIC_ALL"
+      + last_modifier           = (known after apply)
+      + latest_created_revision = (known after apply)
+      + latest_ready_revision   = (known after apply)
+      + launch_stage            = (known after apply)
+      + location                = "europe-west1"
+      + name                    = "meridian-api"
+      + observed_generation     = (known after apply)
+      + project                 = "meridian-payments-515811"
+      + reconciling             = (known after apply)
+      + terminal_condition      = (known after apply)
+      + terraform_labels        = {
+          + "goog-terraform-provisioned" = "true"
+        }
+      + traffic_statuses        = (known after apply)
+      + uid                     = (known after apply)
+      + update_time             = (known after apply)
+      + uri                     = (known after apply)
+      + urls                    = (known after apply)
+
+      + scaling (known after apply)
+
+      + template {
+          + max_instance_request_concurrency = (known after apply)
+          + service_account                  = "meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+          + timeout                          = (known after apply)
+
+          + containers {
+              + build_info = (known after apply)
+              + image      = "europe-west1-docker.pkg.dev/meridian-payments-515811/meridian-repo/api:v1.0.3"
+
+              + env {
+                  + name  = "API_TOKEN_SECRET_ID"
+                  + value = "api-token"
+                }
+              + env {
+                  + name  = "CANDIDATE_NAME"
+                  + value = "Erez Carmeli"
+                }
+              + env {
+                  + name  = "CLOUD_SQL_CONNECTION_NAME"
+                  + value = (known after apply)
+                }
+              + env {
+                  + name  = "DB_NAME"
+                  + value = "appdb"
+                }
+              + env {
+                  + name  = "DB_PASSWORD_SECRET_ID"
+                  + value = "db-password"
+                }
+              + env {
+                  + name  = "DB_USER"
+                  + value = "appuser"
+                }
+              + env {
+                  + name  = "GCP_PROJECT_ID"
+                  + value = "meridian-payments-515811"
+                }
+              + env {
+                  + name  = "GCP_REGION"
+                  + value = "europe-west1"
+                }
+              + env {
+                  + name  = "LOCAL_DEV"
+                  + value = "false"
+                }
+
+              + ports {
+                  + container_port = 8080
+                  + name           = (known after apply)
+                }
+
+              + resources {
+                  + cpu_idle          = true
+                  + limits            = {
+                      + "cpu"    = "1"
+                      + "memory" = "512Mi"
+                    }
+                  + startup_cpu_boost = true
+                }
+
+              + startup_probe (known after apply)
+            }
+
+          + scaling {
+              + max_instance_count = 2
+              + min_instance_count = 0
+            }
+
+          + vpc_access {
+              + egress = "PRIVATE_RANGES_ONLY"
+
+              + network_interfaces {
+                  + network    = (known after apply)
+                  + subnetwork = (known after apply)
+                }
+            }
+        }
+
+      + traffic (known after apply)
+    }
+
+  # google_cloud_run_v2_service_iam_member.public_invoker[0] will be created
+  + resource "google_cloud_run_v2_service_iam_member" "public_invoker" {
+      + etag     = (known after apply)
+      + id       = (known after apply)
+      + location = "europe-west1"
+      + member   = "allUsers"
+      + name     = "meridian-api"
+      + project  = "meridian-payments-515811"
+      + role     = "roles/run.invoker"
+    }
+
+  # google_compute_global_address.psa_range will be created
+  + resource "google_compute_global_address" "psa_range" {
+      + address            = "10.20.0.0"
+      + address_type       = "INTERNAL"
+      + creation_timestamp = (known after apply)
+      + deletion_policy    = "DELETE"
+      + effective_labels   = {
+          + "goog-terraform-provisioned" = "true"
+        }
+      + id                 = (known after apply)
+      + label_fingerprint  = (known after apply)
+      + name               = "google-managed-services-meridian-poc-vpc"
+      + network            = (known after apply)
+      + prefix_length      = 24
+      + project            = "meridian-payments-515811"
+      + purpose            = "VPC_PEERING"
+      + self_link          = (known after apply)
+      + terraform_labels   = {
+          + "goog-terraform-provisioned" = "true"
+        }
+    }
+
+  # google_compute_network.vpc will be created
+  + resource "google_compute_network" "vpc" {
+      + auto_create_subnetworks                   = false
+      + bgp_always_compare_med                    = (known after apply)
+      + bgp_best_path_selection_mode              = (known after apply)
+      + bgp_inter_region_cost                     = (known after apply)
+      + delete_bgp_always_compare_med             = false
+      + delete_default_routes_on_create           = false
+      + deletion_policy                           = "DELETE"
+      + gateway_ipv4                              = (known after apply)
+      + id                                        = (known after apply)
+      + internal_ipv6_range                       = (known after apply)
+      + mtu                                       = (known after apply)
+      + name                                      = "meridian-poc-vpc"
+      + network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+      + network_id                                = (known after apply)
+      + numeric_id                                = (known after apply)
+      + project                                   = "meridian-payments-515811"
+      + routing_mode                              = "REGIONAL"
+      + self_link                                 = (known after apply)
+    }
+
+  # google_compute_subnetwork.subnet will be created
+  + resource "google_compute_subnetwork" "subnet" {
+      + allow_subnet_cidr_routes_overlap = (known after apply)
+      + creation_timestamp               = (known after apply)
+      + deletion_policy                  = "DELETE"
+      + external_ipv6_prefix             = (known after apply)
+      + fingerprint                      = (known after apply)
+      + gateway_address                  = (known after apply)
+      + id                               = (known after apply)
+      + internal_ipv6_prefix             = (known after apply)
+      + ip_cidr_range                    = "10.10.0.0/24"
+      + ipv6_cidr_range                  = (known after apply)
+      + ipv6_gce_endpoint                = (known after apply)
+      + name                             = "meridian-poc-subnet"
+      + network                          = (known after apply)
+      + private_ip_google_access         = true
+      + private_ipv6_google_access       = (known after apply)
+      + project                          = "meridian-payments-515811"
+      + purpose                          = (known after apply)
+      + region                           = "europe-west1"
+      + self_link                        = (known after apply)
+      + stack_type                       = (known after apply)
+      + state                            = (known after apply)
+      + subnetwork_id                    = (known after apply)
+
+      + secondary_ip_range (known after apply)
+    }
+
+  # google_project_iam_member.cloudsql_client will be created
+  + resource "google_project_iam_member" "cloudsql_client" {
+      + etag    = (known after apply)
+      + id      = (known after apply)
+      + member  = "serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+      + project = "meridian-payments-515811"
+      + role    = "roles/cloudsql.client"
+    }
+
+  # google_secret_manager_secret.api_token will be created
+  + resource "google_secret_manager_secret" "api_token" {
+      + create_time           = (known after apply)
+      + deletion_policy       = "DELETE"
+      + deletion_protection   = false
+      + effective_annotations = (known after apply)
+      + effective_labels      = {
+          + "goog-terraform-provisioned" = "true"
+        }
+      + expire_time           = (known after apply)
+      + id                    = (known after apply)
+      + name                  = (known after apply)
+      + project               = "meridian-payments-515811"
+      + secret_id             = "api-token"
+      + terraform_labels      = {
+          + "goog-terraform-provisioned" = "true"
+        }
+
+      + replication {
+          + auto {
+            }
+        }
+    }
+
+  # google_secret_manager_secret.db_password will be created
+  + resource "google_secret_manager_secret" "db_password" {
+      + create_time           = (known after apply)
+      + deletion_policy       = "DELETE"
+      + deletion_protection   = false
+      + effective_annotations = (known after apply)
+      + effective_labels      = {
+          + "goog-terraform-provisioned" = "true"
+        }
+      + expire_time           = (known after apply)
+      + id                    = (known after apply)
+      + name                  = (known after apply)
+      + project               = "meridian-payments-515811"
+      + secret_id             = "db-password"
+      + terraform_labels      = {
+          + "goog-terraform-provisioned" = "true"
+        }
+
+      + replication {
+          + auto {
+            }
+        }
+    }
+
+  # google_secret_manager_secret_iam_member.api_token_accessor will be created
+  + resource "google_secret_manager_secret_iam_member" "api_token_accessor" {
+      + etag      = (known after apply)
+      + id        = (known after apply)
+      + member    = "serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+      + project   = "meridian-payments-515811"
+      + role      = "roles/secretmanager.secretAccessor"
+      + secret_id = "api-token"
+    }
+
+  # google_secret_manager_secret_iam_member.db_password_accessor will be created
+  + resource "google_secret_manager_secret_iam_member" "db_password_accessor" {
+      + etag      = (known after apply)
+      + id        = (known after apply)
+      + member    = "serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+      + project   = "meridian-payments-515811"
+      + role      = "roles/secretmanager.secretAccessor"
+      + secret_id = "db-password"
+    }
+
+  # google_secret_manager_secret_version.api_token will be created
+  + resource "google_secret_manager_secret_version" "api_token" {
+      + create_time            = (known after apply)
+      + deletion_policy        = "ABANDON"
+      + destroy_time           = (known after apply)
+      + enabled                = true
+      + id                     = (known after apply)
+      + name                   = (known after apply)
+      + project                = (known after apply)
+      + secret                 = (known after apply)
+      + secret_data_wo         = (write-only attribute)
+      + secret_data_wo_version = "1"
+      + version                = (known after apply)
+    }
+
+  # google_secret_manager_secret_version.db_password will be created
+  + resource "google_secret_manager_secret_version" "db_password" {
+      + create_time            = (known after apply)
+      + deletion_policy        = "ABANDON"
+      + destroy_time           = (known after apply)
+      + enabled                = true
+      + id                     = (known after apply)
+      + name                   = (known after apply)
+      + project                = (known after apply)
+      + secret                 = (known after apply)
+      + secret_data_wo         = (write-only attribute)
+      + secret_data_wo_version = "1"
+      + version                = (known after apply)
+    }
+
+  # google_service_account.runtime will be created
+  + resource "google_service_account" "runtime" {
+      + account_id      = "meridian-api-runtime"
+      + deletion_policy = "DELETE"
+      + disabled        = false
+      + display_name    = "Meridian API Cloud Run Runtime SA"
+      + email           = "meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+      + id              = (known after apply)
+      + member          = "serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+      + name            = (known after apply)
+      + project         = "meridian-payments-515811"
+      + unique_id       = (known after apply)
+    }
+
+  # google_service_networking_connection.psa_connection will be created
+  + resource "google_service_networking_connection" "psa_connection" {
+      + deletion_policy         = "ABANDON"
+      + id                      = (known after apply)
+      + network                 = (known after apply)
+      + peering                 = (known after apply)
+      + reserved_peering_ranges = [
+          + "google-managed-services-meridian-poc-vpc",
+        ]
+      + service                 = "servicenetworking.googleapis.com"
+    }
+
+  # google_sql_database.appdb will be created
+  + resource "google_sql_database" "appdb" {
+      + charset         = (known after apply)
+      + collation       = (known after apply)
+      + deletion_policy = "DELETE"
+      + id              = (known after apply)
+      + instance        = "meridian-poc-pg"
+      + name            = "appdb"
+      + project         = "meridian-payments-515811"
+      + self_link       = (known after apply)
+    }
+
+  # google_sql_database_instance.postgres will be created
+  + resource "google_sql_database_instance" "postgres" {
+      + available_maintenance_versions       = (known after apply)
+      + connection_name                      = (known after apply)
+      + database_version                     = "POSTGRES_18"
+      + deletion_policy                      = "DELETE"
+      + deletion_protection                  = false
+      + dns_name                             = (known after apply)
+      + dns_names                            = (known after apply)
+      + encryption_confidential_mode         = (known after apply)
+      + encryption_key_name                  = (known after apply)
+      + enforce_new_sql_network_architecture = (known after apply)
+      + first_ip_address                     = (known after apply)
+      + id                                   = (known after apply)
+      + instance_type                        = (known after apply)
+      + ip_address                           = (known after apply)
+      + maintenance_version                  = (known after apply)
+      + master_instance_name                 = (known after apply)
+      + name                                 = "meridian-poc-pg"
+      + node_count                           = (known after apply)
+      + private_ip_address                   = (known after apply)
+      + project                              = "meridian-payments-515811"
+      + psc_service_attachment_link          = (known after apply)
+      + public_ip_address                    = (known after apply)
+      + region                               = "europe-west1"
+      + replica_names                        = (known after apply)
+      + root_password_wo                     = (write-only attribute)
+      + self_link                            = (known after apply)
+      + server_ca_cert                       = (sensitive value)
+      + service_account_email_address        = (known after apply)
+
+      + replica_configuration (known after apply)
+
+      + replication_cluster (known after apply)
+
+      + settings {
+          + activation_policy                = "ALWAYS"
+          + availability_type                = "ZONAL"
+          + connector_enforcement            = (known after apply)
+          + data_api_access                  = (known after apply)
+          + data_disk_provisioned_iops       = (known after apply)
+          + data_disk_provisioned_throughput = (known after apply)
+          + disk_autoresize                  = true
+          + disk_autoresize_limit            = 0
+          + disk_size                        = 10
+          + disk_type                        = (known after apply)
+          + edition                          = "ENTERPRISE"
+          + effective_availability_type      = (known after apply)
+          + pricing_plan                     = "PER_USE"
+          + replication_lag_max_seconds      = (known after apply)
+          + tier                             = "db-f1-micro"
+          + user_labels                      = (known after apply)
+          + version                          = (known after apply)
+
+          + backup_configuration {
+              + backup_tier                    = (known after apply)
+              + enabled                        = false
+              + start_time                     = (known after apply)
+              + transaction_log_retention_days = (known after apply)
+
+              + backup_retention_settings (known after apply)
+            }
+
+          + connection_pool_config (known after apply)
+
+          + data_cache_config (known after apply)
+
+          + insights_config (known after apply)
+
+          + ip_configuration {
+              + enable_private_path_for_google_cloud_services = false
+              + ipv4_enabled                                  = false
+              + private_network                               = (known after apply)
+              + server_ca_mode                                = (known after apply)
+              + ssl_mode                                      = "ENCRYPTED_ONLY"
+            }
+
+          + location_preference (known after apply)
+
+          + read_pool_auto_scale_config (known after apply)
+        }
+    }
+
+  # google_sql_user.appuser will be created
+  + resource "google_sql_user" "appuser" {
+      + deletion_policy         = "ABANDON"
+      + host                    = (known after apply)
+      + iam_email               = (known after apply)
+      + id                      = (known after apply)
+      + instance                = "meridian-poc-pg"
+      + name                    = "appuser"
+      + password_wo             = (write-only attribute)
+      + password_wo_version     = 1
+      + project                 = "meridian-payments-515811"
+      + sql_server_user_details = (known after apply)
+    }
+
+Plan: 1 to import, 17 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + artifact_registry_repo_url    = "europe-west1-docker.pkg.dev/meridian-payments-515811/meridian-repo"
+  + cloud_run_url                 = (known after apply)
+  + cloud_sql_connection_name     = (known after apply)
+  + cloud_sql_private_ip          = (known after apply)
+  + runtime_service_account_email = "meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+google_artifact_registry_repository.repo: Importing... [id=projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo]
+google_artifact_registry_repository.repo: Import complete [id=projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo]
+google_compute_network.vpc: Creating...
+google_service_account.runtime: Creating...
+google_secret_manager_secret.api_token: Creating...
+google_secret_manager_secret.db_password: Creating...
+google_secret_manager_secret.api_token: Creation complete after 3s [id=projects/meridian-payments-515811/secrets/api-token]
+google_secret_manager_secret_version.api_token: Creating...
+google_secret_manager_secret.db_password: Creation complete after 3s [id=projects/meridian-payments-515811/secrets/db-password]
+google_secret_manager_secret_version.db_password: Creating...
+google_secret_manager_secret_version.api_token: Creation complete after 1s [id=projects/1061132507740/secrets/api-token/versions/1]
+google_secret_manager_secret_version.db_password: Creation complete after 1s [id=projects/1061132507740/secrets/db-password/versions/1]
+google_service_account.runtime: Still creating... [00m10s elapsed]
+google_compute_network.vpc: Still creating... [00m10s elapsed]
+google_compute_network.vpc: Creation complete after 12s [id=projects/meridian-payments-515811/global/networks/meridian-poc-vpc]
+google_compute_global_address.psa_range: Creating...
+google_compute_subnetwork.subnet: Creating...
+google_service_account.runtime: Still creating... [00m20s elapsed]
+google_service_account.runtime: Creation complete after 21s [id=projects/meridian-payments-515811/serviceAccounts/meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_project_iam_member.cloudsql_client: Creating...
+google_secret_manager_secret_iam_member.db_password_accessor: Creating...
+google_secret_manager_secret_iam_member.api_token_accessor: Creating...
+google_compute_global_address.psa_range: Still creating... [00m10s elapsed]
+google_compute_subnetwork.subnet: Still creating... [00m10s elapsed]
+google_compute_global_address.psa_range: Creation complete after 13s [id=projects/meridian-payments-515811/global/addresses/google-managed-services-meridian-poc-vpc]
+google_service_networking_connection.psa_connection: Creating...
+google_secret_manager_secret_iam_member.api_token_accessor: Creation complete after 6s [id=projects/meridian-payments-515811/secrets/api-token/roles/secretmanager.secretAccessor/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_secret_manager_secret_iam_member.db_password_accessor: Creation complete after 7s [id=projects/meridian-payments-515811/secrets/db-password/roles/secretmanager.secretAccessor/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_project_iam_member.cloudsql_client: Creation complete after 10s [id=meridian-payments-515811/roles/cloudsql.client/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_compute_subnetwork.subnet: Still creating... [00m20s elapsed]
+google_service_networking_connection.psa_connection: Still creating... [00m10s elapsed]
+google_compute_subnetwork.subnet: Creation complete after 24s [id=projects/meridian-payments-515811/regions/europe-west1/subnetworks/meridian-poc-subnet]
+google_service_networking_connection.psa_connection: Still creating... [00m20s elapsed]
+google_service_networking_connection.psa_connection: Still creating... [00m30s elapsed]
+google_service_networking_connection.psa_connection: Still creating... [00m40s elapsed]
+google_service_networking_connection.psa_connection: Still creating... [00m50s elapsed]
+google_service_networking_connection.psa_connection: Creation complete after 54s [id=projects%2Fmeridian-payments-515811%2Fglobal%2Fnetworks%2Fmeridian-poc-vpc:servicenetworking.googleapis.com]
+google_sql_database_instance.postgres: Creating...
+google_sql_database_instance.postgres: Still creating... [00m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [00m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [00m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [00m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [00m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [01m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [02m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [03m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [04m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [05m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [06m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [07m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [08m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [09m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m00s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m10s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m20s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m30s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m40s elapsed]
+google_sql_database_instance.postgres: Still creating... [10m50s elapsed]
+google_sql_database_instance.postgres: Still creating... [11m00s elapsed]
+google_sql_database_instance.postgres: Creation complete after 11m5s [id=meridian-poc-pg]
+google_sql_database.appdb: Creating...
+google_sql_user.appuser: Creating...
+google_sql_database.appdb: Creation complete after 4s [id=projects/meridian-payments-515811/instances/meridian-poc-pg/databases/appdb]
+google_sql_user.appuser: Creation complete after 6s [id=appuser//meridian-poc-pg]
+google_cloud_run_v2_service.api: Creating...
+google_cloud_run_v2_service.api: Still creating... [00m10s elapsed]
+google_cloud_run_v2_service.api: Still creating... [00m20s elapsed]
+google_cloud_run_v2_service.api: Creation complete after 22s [id=projects/meridian-payments-515811/locations/europe-west1/services/meridian-api]
+google_cloud_run_v2_service_iam_member.public_invoker[0]: Creating...
+google_cloud_run_v2_service_iam_member.public_invoker[0]: Creation complete after 5s [id=projects/meridian-payments-515811/locations/europe-west1/services/meridian-api/roles/run.invoker/allUsers]
+
+Apply complete! Resources: 1 imported, 17 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+artifact_registry_repo_url = "europe-west1-docker.pkg.dev/meridian-payments-515811/meridian-repo"
+cloud_run_url = "https://meridian-api-x6prqdf3ua-ew.a.run.app"
+cloud_sql_connection_name = "meridian-payments-515811:europe-west1:meridian-poc-pg"
+cloud_sql_private_ip = "10.20.0.3"
+runtime_service_account_email = "meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com"
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc>
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc> 
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc> # Confirm zero plaintext secrets exist in remote state (should return nothing)
+>> terraform -chdir=infra state pull | Select-String -Pattern '"(password|secret_data)"'
+>> 
+>> #                                 
+
+            "secret_data": null,
+                "value": "secret_data"
+            "secret_data": null,
+                "value": "secret_data"
+            "password": null,
+                "value": "password"
+
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc>
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc> (.venv) PS C:\Users\ErezCarmeli\Code\meridian_payments_gcp_poc> # 2. Confirm zero drift on re-plan
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc> terraform -chdir=infra plan `
+>>   -var="gcp_project_id=meridian-payments-515811" `
+>>   -var="gcp_region=europe-west1" `
+>>   -var="cloudrun_image_tag=v1.0.3"
+var.api_token (ephemeral)
+  Third-party provider API token stored in Secret Manager (write-only; never persisted in state or plan files).
+
+  Enter a value: 
+
+
+var.sql_user_password (ephemeral)
+  Write-only password for appuser; pass via TF_VAR_sql_user_password at apply time (omitted from plans and state).
+
+  Enter a value: 
+
+
+google_compute_network.vpc: Refreshing state... [id=projects/meridian-payments-515811/global/networks/meridian-poc-vpc]
+google_service_account.runtime: Refreshing state... [id=projects/meridian-payments-515811/serviceAccounts/meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_secret_manager_secret.api_token: Refreshing state... [id=projects/meridian-payments-515811/secrets/api-token]
+google_secret_manager_secret.db_password: Refreshing state... [id=projects/meridian-payments-515811/secrets/db-password]
+google_artifact_registry_repository.repo: Refreshing state... [id=projects/meridian-payments-515811/locations/europe-west1/repositories/meridian-repo]
+google_compute_global_address.psa_range: Refreshing state... [id=projects/meridian-payments-515811/global/addresses/google-managed-services-meridian-poc-vpc]
+google_compute_subnetwork.subnet: Refreshing state... [id=projects/meridian-payments-515811/regions/europe-west1/subnetworks/meridian-poc-subnet]
+google_secret_manager_secret_version.api_token: Refreshing state... [id=projects/1061132507740/secrets/api-token/versions/1]
+google_secret_manager_secret_version.db_password: Refreshing state... [id=projects/1061132507740/secrets/db-password/versions/1]
+google_service_networking_connection.psa_connection: Refreshing state... [id=projects%2Fmeridian-payments-515811%2Fglobal%2Fnetworks%2Fmeridian-poc-vpc:servicenetworking.googleapis.com]
+google_project_iam_member.cloudsql_client: Refreshing state... [id=meridian-payments-515811/roles/cloudsql.client/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_secret_manager_secret_iam_member.api_token_accessor: Refreshing state... [id=projects/meridian-payments-515811/secrets/api-token/roles/secretmanager.secretAccessor/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_secret_manager_secret_iam_member.db_password_accessor: Refreshing state... [id=projects/meridian-payments-515811/secrets/db-password/roles/secretmanager.secretAccessor/serviceAccount:meridian-api-runtime@meridian-payments-515811.iam.gserviceaccount.com]
+google_sql_database_instance.postgres: Refreshing state... [id=meridian-poc-pg]
+google_sql_database.appdb: Refreshing state... [id=projects/meridian-payments-515811/instances/meridian-poc-pg/databases/appdb]
+google_sql_user.appuser: Refreshing state... [id=appuser//meridian-poc-pg]
+google_cloud_run_v2_service.api: Refreshing state... [id=projects/meridian-payments-515811/locations/europe-west1/services/meridian-api]
+google_cloud_run_v2_service_iam_member.public_invoker[0]: Refreshing state... [id=projects/meridian-payments-515811/locations/europe-west1/services/meridian-api/roles/run.invoker/allUsers]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc>
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc>
+PS C:\Users\Erez Carmeli\Code\meridian_payments_gcp_poc> curl -s "https://meridian-api-x6prqdf3ua-ew.a.run.app/health"
+{"candidate":"Erez Carmeli","commit":"v1.0.3","region":"europe-west1","db":"ok","secret":"ok"}
